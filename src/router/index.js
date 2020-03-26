@@ -2,12 +2,23 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../components/Home.vue'
 import Edit from '../components/Edit.vue'
+import Chatroom from '../components/Chatroom.vue'
+import Personal from '../components/Personal.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
-  {path:'/', component: Home},
-  {path:'/edit', component: Edit}
+  {path:'/', redirect:'/home'},
+  {
+    path:'/home', 
+    component: Home,
+    redirect: '/home/edit',
+    children:[
+      {path:'edit', component: Edit},
+      {path:'chatroom', component: Chatroom},
+      {path:'personal', component: Personal}
+    ]
+  },
 ]
 
 const router = new VueRouter({
@@ -15,3 +26,7 @@ const router = new VueRouter({
 })
 
 export default router
+
+
+
+
