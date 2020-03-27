@@ -1,6 +1,6 @@
 <template>
     <div>
-        我是编辑
+        1
     </div>
 </template>
 
@@ -11,5 +11,8 @@ export default {
 </script>
 
 <style scoped>
-    
+    div{
+        height: 100vh;
+
+    }
 </style>
