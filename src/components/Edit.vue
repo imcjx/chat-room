@@ -104,6 +104,7 @@ header{
     cursor: pointer;
     text-align: center;
     line-height: 1.6em;
+    border: 1px solid rgb(192,196,204);
     border-radius: 7px;
 }
 
@@ -129,6 +130,11 @@ header{
 
 .photo-container > .el-button:hover{
     opacity: 0.7;
+}
+
+.photo-container:hover{
+    transition: all 0.6s ease;
+    border-color: rgb(192,196,204);
 }
 
 .info{
