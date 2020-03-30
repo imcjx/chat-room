@@ -9,10 +9,10 @@
                 </div>
                 <div class="tools">
                     <i class="el-icon-search"></i>
-                    <i class="el-icon-s-custom"></i>
+                    <i class="el-icon-s-custom" @click="unfold('share')"></i>
                     <i class="el-icon-s-operation" @click="submenuFlag=!submenuFlag;"></i>
                     <div v-show="submenuFlag" class="submenu" tabindex="2" @blur="disappear">
-                        <div style="margin-bottom: 15px;" @click="unfold"><span>Mute</span><i class="el-icon-set-up"></i></div>
+                        <div style="margin-bottom: 15px;" @click="unfold('room')"><span>Mute</span><i class="el-icon-set-up"></i></div>
                         <div><span>Delete</span><i class="el-icon-delete"></i></div>
                     </div>
                 </div>
@@ -37,7 +37,71 @@
             </div>
         </div>
         <div v-show="rightFlag" :style="rightWidth" class="right">
-            <header><i class="el-icon-arrow-left" @click="fold"></i></header>  
+            <header><i class="el-icon-arrow-left" @click="fold"></i></header>
+            <div v-if="shareOrRoomFlag" class="roomInfo">
+                <div class="container">
+                    <div><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
+                    <div>
+                        <span style="display:inline-block;margin-bottom:8px;">Bootstrap Themes</span>
+                        <span style="display:inline-block;color: rgb(178, 184, 190);font-size:13px;">35members · HTML,CSS,and Javascript Help</span>
+                    </div>
+                </div>
+                <footer>
+                    <div class="photo-container">
+                        <span class="tip">Photo</span>
+                        <button><i class="el-icon-picture-outline"></i></button>
+                        <span style="display:inline-block">You can upload jpg. gif or png files.Max file size 3mb.</span>
+                    </div>
+                    <div class="info">
+                        <span class="tip">Name</span>
+                        <el-input
+                            placeholder="Group Name"
+                            clearable>
+                        </el-input>
+                    </div>
+                    <div class="info">
+                        <span class="tip">Topic(optional)</span>
+                        <el-input
+                            placeholder="Group Topic"
+                            clearable>
+                        </el-input>
+                    </div>
+                    <div class="info">
+                        <span class="tip">Description</span>
+                        <el-input
+                            style="background-color: rgb(237,238,246);"
+                            type="textarea"
+                            :rows="4"
+                            placeholder="Group Description">
+                        </el-input>
+                    </div>
+                    <el-button type="primary">Modify</el-button>
+                </footer>
+            </div> 
+            <div v-else class="shareInfo">
+                <div class="container">
+                    <div class="roomTitle">
+                        <div class="portrait"><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
+                        <div>Documentation</div>
+                        <a style="display:inline-block;" href="javascripts:;">
+                            Quick setup and.build tools
+                            <i class="el-icon-paperclip share"></i>
+                        </a>
+                    </div>
+                    <hr>
+                    <div class="roomIntro">
+                        123
+                    </div>
+                </div>
+                <footer>
+                    <div class="shareContent">
+                        <ul>
+                            <li>QQ<span>1</span></li>
+                            <li>微信<span>2</span></li>
+                        </ul>
+                    </div>
+                </footer>
+            </div>
         </div>
     </div>
 </template>
@@ -50,6 +114,7 @@ export default {
             rightWidth: {width: '0%'},
             submenuFlag: false,
             rightFlag: false,
+            shareOrRoomFlag: false,
             oneself:{
                 id: '123456',
                 name: 'cjx',
@@ -66,10 +131,11 @@ export default {
     },
     methods:{
         //展开右侧内容
-        unfold(){
+        unfold(str){
             this.mainWidth.width='80%';
             this.rightWidth.width='20%';
             this.rightFlag=true;
+            this.shareOrRoomFlag=(str=='room'?true:false);
         },
         //折叠右侧内容
         fold(){
@@ -335,5 +401,188 @@ input::-webkit-input-placeholder {
     box-sizing: border-box;
     height: 12vh;
     border-bottom: 2px solid rgb(245,246,250);
+}
+
+.roomInfo .container{
+    box-sizing: border-box;
+    height: 33vh;
+    padding: 20px;
+    border-left: none;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.roomInfo .container div:nth-of-type(1){
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    overflow: hidden; 
+    border: 1px solid rgb(230, 230, 233);
+}
+
+.right footer{
+    box-sizing: border-box;
+    height: 55vh;
+    background-color: rgb(245,246,250);
+    padding: 15px;
+}
+
+footer .photo-container{
+    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+    height: 12vh;
+    margin: 0 auto 20px;
+    padding: 10px;
+    background-color: rgb(237,238,246);
+    font-size: 10px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid rgb(220,223,230);
+}
+
+footer .tip{
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateY(-100%);
+    color: rgb(143,143,155);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+footer .photo-container > span{
+    color: rgb(179,184,191);
+    text-align: center;
+}
+
+footer .photo-container > button{
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin: 5px 0;
+    padding: 5px;
+    background-color: rgb(1,118,255);
+    color: rgb(255,255,255);
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+footer .photo-container:hover{
+    opacity: 0.8;
+    border-color: rgb(192,196,204);
+}
+
+footer .info >>> .el-input__inner{
+    background-color: rgb(237,238,246);
+    height: 4vh;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+footer .info >>> .el-textarea__inner{
+    background-color: rgb(237,238,246);
+    margin-bottom: 20px;
+    resize: none;
+}
+
+footer .el-button{
+    width: 100%;
+    background-color:rgb(1,118,255);
+}
+
+footer .el-button:hover{
+    opacity: 0.7;
+}
+
+.shareInfo .container{
+    box-sizing: border-box;
+    height: 33vh;
+    padding: 20px;
+    border-left: none;
+    font-size: 14px;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.shareInfo .portrait{
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden; 
+    border: 1px solid rgb(230, 230, 233);
+}
+
+.shareInfo .roomTitle{
+    box-sizing: border-box;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.shareInfo .roomTitle .portrait{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.shareInfo .roomTitle div:nth-of-type(2) , .shareInfo .roomTitle a{
+    width: calc(100% - 50px);
+    box-sizing: border-box;
+    margin-left: 50px;
+    white-space:nowrap; 
+    overflow:hidden; 
+    text-overflow:ellipsis;
+}
+
+.shareInfo .roomTitle a{
+    font-size: 13px;
+    color: rgb(163,164,173);
+    text-decoration-line: none;
+}
+
+.shareInfo .roomTitle a:hover{
+    text-decoration-line: underline;
+}
+
+.shareInfo .roomIntro{
+    padding: 20px;
+    text-align: center;
+}
+
+.shareInfo footer .shareContent{
+    box-sizing: border-box;
+    padding: 30px 20px;
+    border-radius: 3px;
+    background-color: rgb(255,255,255);
+    color: rgb(157,164,172);
+}
+
+.shareInfo ul{
+    list-style: none;
+}
+
+footer .shareContent li{
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    line-height: 2em;
+    cursor: pointer;
+}
+
+footer .shareContent li:not(:last-child) { 
+    border-bottom: 1px solid rgb(245,246,250); 
+    
+} 
+
+footer .shareContent li:hover{
+    background-color: rgb(245,246,250);
 }
 </style>

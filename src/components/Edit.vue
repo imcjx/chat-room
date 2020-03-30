@@ -15,7 +15,7 @@
                 <div>Max file size 3mb.</div>
             </div>
         </label>
-        <label >
+        <label>
             <div class="info">
                 <span class="tip">Name</span>
                 <el-input
@@ -104,7 +104,7 @@ header{
     cursor: pointer;
     text-align: center;
     line-height: 1.6em;
-    border: 1px solid rgb(192,196,204);
+    border: 1px solid rgb(220,223,230);
     border-radius: 7px;
 }
 
