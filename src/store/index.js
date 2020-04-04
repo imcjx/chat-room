@@ -5,6 +5,13 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    oneself:{
+      id: '123456',
+      name: 'Matthew Wiggins',
+      headPortrait: "../assets/bird.png",
+      intro: "Bootstrap is an open source toolkit fordeveloping web with HTML.",
+      Country: 'China',
+    },
   },
   mutations: {
   },

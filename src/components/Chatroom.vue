@@ -8,19 +8,26 @@
                     <div class="theme-name" style="color: rgb(178,184,190);">35members · HTML,CSS,and Javascript Help</div>
                 </div>
                 <div class="tools">
-                    <i class="el-icon-search"></i>
+                    <i class="el-icon-search" @click="toggleSearch"></i>
                     <i class="el-icon-s-custom" @click="unfold('share')"></i>
                     <i class="el-icon-s-operation" @click="submenuFlag=!submenuFlag;"></i>
                     <div v-show="submenuFlag" class="submenu" tabindex="2" @blur="disappear">
                         <div style="margin-bottom: 15px;" @click="unfold('room')"><span>Mute</span><i class="el-icon-set-up"></i></div>
-                        <div><span>Delete</span><i class="el-icon-delete"></i></div>
+                        <div @click="open"><span>Delete</span><i class="el-icon-delete"></i></div>
                     </div>
                 </div>
             </header>
-            <div class="msg-container">
+            <div v-show="searchFlag" :style="searchHeight" class="search-container">
+                <el-input
+                    placeholder="Search this chat"
+                    suffix-icon="el-icon-search"
+                    v-model="searchChatInfo">
+                </el-input>
+            </div>
+            <div class="msg-container" :style="infoHeight">
                 <ul>
-                    <li :key="index" v-for="(item,index) in chatRecord" class="clearfix">
-                        <div :class="[item.id==oneself.id?'msg-self':'msg-others']">
+                    <li :key="index" v-for="(item,index) in search(chatRecord)" class="clearfix">
+                        <div :class="[item.id==$store.state.oneself.id?'msg-self':'msg-others']">
                             <div class="portrait"><img src="../assets/bird.png" alt="头像"></div> 
                             <div class="msg"><span style="color: rgb(47,52,67);">{{item.name}}</span><br>{{item.info}}</div>
                         </div>
@@ -28,11 +35,11 @@
                 </ul>
             </div>
             <div class="msg-send">
-                <input type="text" placeholder="Type your message...">
+                <input type="text" :placeholder="sendMsgTip" v-model="inputMsg">
                 <div class="btns">
                     <i class="el-icon-picture-outline-round expression"></i>
                     <i class="el-icon-paperclip share"></i>
-                    <el-button class="send" type="primary" icon="el-icon-s-promotion" circle></el-button>
+                    <el-button @click="sendMsg" type="primary" icon="el-icon-s-promotion" circle></el-button>
                 </div>
             </div>
         </div>
@@ -115,18 +122,22 @@ export default {
             submenuFlag: false,
             rightFlag: false,
             shareOrRoomFlag: false,
-            oneself:{
-                id: '123456',
-                name: 'cjx',
-                headPortrait: "",
-            },
+            //用户输入的聊天信息
+            inputMsg: '',
+            //用户输入的提示信息
+            sendMsgTip: 'Type your message...',
             chatRecord:[
                 {id:"123",name:"张三",info:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"},
                 {id:"456",name:"李四",info:"今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"},
                 {id:"456",name:"李四",info:"123456哈哈"},
                 {id:"123456",name:"cjx",info:"今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"},
                 {id:"123456",name:"cjx",info:"太难了太难了爷要晕了"}
-            ]
+            ],
+            searchFlag: false,
+            searchHeight: {height:"0vh"},
+            infoHeight: {height:"76vh"},
+            //搜索聊天记录
+            searchChatInfo: '',
         }
     },
     methods:{
@@ -146,8 +157,77 @@ export default {
         //二级菜单焦点失去时隐藏
         disappear(){
             this.submenuFlag=false;
+        },
+        //发送信息
+        sendMsg(){
+            if(this.inputMsg.trim()==""){
+                this.sendMsgTip='Information cannot be empty'
+            }else{
+                this.chatRecord.push({
+                    id: this.$store.state.oneself.id,
+                    name: this.$store.state.oneself.name,
+                    info: this.inputMsg,
+                });
+                this.sendMsgTip='Type your message...';
+            }
+            this.inputMsg='';
+        },
+        //搜索框的出现与隐藏
+        toggleSearch(){
+            this.searchFlag=!this.searchFlag;
+            if(this.searchFlag){
+                this.searchHeight.height="10vh";
+                this.infoHeight.height="66vh";
+            }else{
+                this.searchHeight.height="0vh";
+                this.infoHeight.height="76vh";
+            }
+        },
+        //删除信息出现弹框
+        open() {
+            this.$confirm('此操作将永久删除该房间, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                console.log('执行删除成功操作……');
+                this.$message({
+                    type: 'success',
+                    message: '删除成功!'
+                });
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });          
+            });
+        },
+        //查询想要的信息
+        search(arr){
+            const newList=arr.filter(item => {
+                if(item.info.includes(this.searchChatInfo)){
+                    return item;
+                }
+            })
+            return newList;
         }
-    }
+    },
+    watch:{
+        chatRecord: ()=>{
+            setTimeout(()=>{
+                let el=document.getElementsByClassName("msg-container")[0];
+                el.scrollTop=el.scrollHeight;
+            },10)
+            // ↓只能定位到倒数第二个元素（数据更新了DOM还没渲染）
+            // let el=document.getElementsByClassName("msg-container")[0];
+            // el.scrollTop = el.scrollHeight;
+        }
+    },
+    mounted(){
+        //页面一加载滚动条到底部
+        let el=document.getElementsByClassName("msg-container")[0];
+        el.scrollTop=el.scrollHeight;
+    },
 }
 </script>
 
@@ -162,6 +242,25 @@ export default {
     height: 100%;
     background-color: rgb(255,255,255);
     border-left: 5px solid rgb(245,246,250);
+}
+
+.search-container{
+    position: relative;
+    box-sizing: border-box;
+    height: 10vh;
+    padding: 0 10% 0 24px;
+    border-bottom: 2px solid rgb(245,246,250);
+    transition: all 0.9s ease;
+}
+
+.search-container .el-input{
+    transform: translateY(-50%);
+}
+
+.search-container >>> .el-input__inner{
+    position: absolute;
+    top: 50%;
+    background-color: rgb(237,238,246);
 }
 
 .msg-container{

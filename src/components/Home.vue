@@ -7,7 +7,7 @@
                 <li><router-link to="/home/chatroom"><i class="el-icon-chat-square"></i></router-link></li>
                 <li><router-link to="/home/personal"><i class="el-icon-user"></i></router-link></li>
             </ul>
-            <i class="el-icon-setting"></i>
+            <i class="el-icon-setting" @click="test"></i>
         </el-aside>
         <el-main><router-view></router-view></el-main>
     </el-container>
@@ -15,7 +15,26 @@
 
 <script>
 export default {
-    
+    methods:{
+        //websocket通信测试
+        test(){
+            let ws=new WebSocket('ws://echo.websocket.org/echo');
+            ws.onopen = function(evt) { 
+                console.log("连接打开 ..."); 
+                ws.send('{"id":"123456","info":"俺喜欢你","name":"cjx"}')
+            };
+
+            ws.onmessage = function(evt) {
+                console.log( "收到的消息为：" + evt.data);
+                console.log(JSON.parse(evt.data));
+                
+            };
+
+            ws.onclose = function(evt) {
+                console.log("Connection closed.");
+            };   
+        }
+    }
 }
 </script>
 
