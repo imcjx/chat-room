@@ -16,15 +16,25 @@
             </div>
             <div class="minorInfo">
                 <ul>
-                    <li><div>Country</div><div>{{}}</div><i class=""></i></li>
-                    <li><div>Country</div><div>{{}}</div><i class=""></i></li>
-                    <li><div>Country</div><div>{{}}</div><i class=""></i></li>
-                    <li><div>Country</div><div>{{}}</div><i class=""></i></li>
+                    <li><div><span>Country</span><br>{{$store.state.oneself.country}}</div><i class="el-icon-office-building"></i></li>
+                    <li><div><span>Phone</span><br>{{$store.state.oneself.phone}}</div><i class="el-icon-phone-outline"></i></li>
+                    <li><div><span>Email</span><br>{{$store.state.oneself.email}}</div><i class="el-icon-message"></i></li>
+                    <li><div><span>Time</span><br>{{$store.state.oneself.time}}</div><i class="el-icon-timer"></i></li>
                 </ul>
             </div>
         </div>
         <div class="setting-container">
-            //？？？？
+            <header>
+                <div>
+                    <h3>Settings</h3> 
+                    <span>Update your profile details</span>
+                </div>
+            </header>
+            <div class="main">
+                <div class="main-container">
+                    
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -115,25 +125,67 @@ export default {
     box-sizing: border-box;
     height: 100%;
     list-style: none;
-    background-color: orange;
 }
 
 .minorInfo ul li{
+    position: relative;
     box-sizing: border-box;
     height: 25%;
     padding: 10px 0;
 }
 
 .minorInfo ul li:not(:last-child){
-    border-bottom: 1px solid rgb(245,246,250); 
+    border-bottom: 2px solid rgb(245,246,250); 
 }
+
+.minorInfo ul i{
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.3em;
+    color: rgb(161,162,171);
+}
+
+.minorInfo ul div{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgb(161,162,171);
+}
+
+.minorInfo ul span{
+    font-size: 0.9em;
+    color: rgb(187,191,197);
+}
+
+
 
 .setting-container{
     box-sizing: border-box;
     float: right;
     height: 100%;
     width: 72%;
-    background-color: orange;
-    
+    background-color: #fff;   
+}
+
+.setting-container header{
+    position: relative;
+    box-sizing: border-box;
+
+    height: 11vh;
+    border-bottom: 2px solid rgb(245,246,250);
+}
+
+.setting-container header div{
+    position: absolute;
+    left: 3%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.setting-container header span{
+    font-size: 0.9em;
+    color: rgb(161,162,171);
 }
 </style>

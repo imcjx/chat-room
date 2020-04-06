@@ -10,7 +10,10 @@ export default new Vuex.Store({
       name: 'Matthew Wiggins',
       headPortrait: "../assets/bird.png",
       intro: "Bootstrap is an open source toolkit fordeveloping web with HTML.",
-      Country: 'China',
+      country: 'China',
+      phone: '136XXXXXXXX',
+      email: '850839565@qq.com',
+      time: '21:07'
     },
   },
   mutations: {
