@@ -7,12 +7,11 @@
                 suffix-icon="el-icon-search">
             </el-input>
         </div>
-        <label class="photo">
+        <label forclass="photo">
             <div class="photo-container">
                 <span class="tip">Photo</span>
                 <el-button icon="el-icon-picture-outline" circle></el-button>
-                <div>You can upload jpg. gif or png files.</div>
-                <div>Max file size 3mb.</div>
+                <div>You can upload jpg. gif or png files.<br>Max file size 3mb.</div>
             </div>
         </label>
         <label>
@@ -46,7 +45,7 @@
             </div>
         </label>
         <div class="submit">
-            <el-button type="primary" @click="subGroupInfo">Create group</el-button>
+            <el-button type="primary" @click="createGroup">{{buttonInfo}}</el-button>
         </div>
     </div>
 </template>
@@ -55,6 +54,7 @@
 export default {
     data(){
         return{
+            buttonInfo:'Create group',
             GroupInfo:{
                 photo: '',
                 name: '',
@@ -64,9 +64,30 @@ export default {
         }
     },
     methods:{
-        subGroupInfo(){
-            console.log(`${this.GroupInfo.photo}+${this.GroupInfo.name}+${this.GroupInfo.topic}+${this.GroupInfo.description}`);     
+        createGroup(){
+            console.log(1);
+            if(this.GroupInfo.name.trim()==''||this.GroupInfo.name.trim()==''
+            ||this.GroupInfo.name.trim()==''){
+                 this.buttonInfo='Infomation empty!';
+            }else{
+                this.$store.state.socket.emit('create',{
+                    home_face: '无',
+                    home_name: this.GroupInfo.name,
+                    home_topic: this.GroupInfo.topic,
+                    home_info: this.GroupInfo.description,
+                    home_name: this.GroupInfo.name,
+                    admin_id: this.$store.state.oneself.id,
+                    url: `roomId=${this.$store.state.oneself.id}`
+                });
+                this.buttonInfo='Create group';
+            }
         }
+    },
+    mounted(){
+        //房间创建信息返回  
+        this.$store.state.socket.on('create', data => {
+            console.log(data);
+        })
     }
 }
 </script>

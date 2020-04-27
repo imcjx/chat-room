@@ -4,8 +4,8 @@
             <header>
                 <div class="group-theme-info clearfix">
                     <div class="theme-photo"><img src="../assets/bird.png" alt="bird"></div>
-                    <div class="theme-name">Bootstrap Themes</div><br>
-                    <div class="theme-name" style="color: rgb(178,184,190);">35members · HTML,CSS,and Javascript Help</div>
+                    <div class="theme-name">{{$store.state.roomInfo.name}}</div><br>
+                    <div class="theme-name" style="color: rgb(178,184,190);">{{$store.state.roomInfo.members}}members · {{$store.state.roomInfo.topic}}</div>
                 </div>
                 <div class="tools">
                     <i class="el-icon-search" @click="toggleSearch"></i>
@@ -26,10 +26,10 @@
             </div>
             <div class="msg-container" :style="infoHeight">
                 <ul>
-                    <li :key="index" v-for="(item,index) in search(chatRecord)" class="clearfix">
+                    <li :key="index" v-for="(item,index) in search($store.state.chatRecord)" class="clearfix">
                         <div :class="[item.id==$store.state.oneself.id?'msg-self':'msg-others']">
                             <div class="portrait"><img src="../assets/bird.png" alt="头像"></div> 
-                            <div class="msg"><span style="color: rgb(47,52,67);">{{item.name}}</span><br>{{item.info}}</div>
+                            <div class="msg"><span style="color: rgb(47,52,67);">{{item.name}}</span><br>{{item.info}}<br>{{item.time}}</div>
                         </div>
                     </li>
                 </ul>
@@ -49,8 +49,8 @@
                 <div class="container">
                     <div><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
                     <div>
-                        <span style="display:inline-block;margin-bottom:8px;">Bootstrap Themes</span>
-                        <span style="display:inline-block;color: rgb(178, 184, 190);font-size:13px;">35members · HTML,CSS,and Javascript Help</span>
+                        <span style="display:inline-block;margin-bottom:8px;">{{$store.state.roomInfo.name}}</span>
+                        <span style="display:inline-block;color: rgb(178, 184, 190);font-size:13px;">{{$store.state.roomInfo.members}}members · {{$store.state.roomInfo.topic}}</span>
                     </div>
                 </div>
                 <footer>
@@ -91,13 +91,13 @@
                         <div class="portrait"><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
                         <div>Documentation</div>
                         <a style="display:inline-block;" href="javascripts:;">
-                            Quick setup and.build tools
+                            link
                             <i class="el-icon-paperclip share"></i>
                         </a>
                     </div>
                     <hr>
                     <div class="roomIntro">
-                        123
+                        {{$store.state.roomInfo.description}}
                     </div>
                 </div>
                 <footer>
@@ -126,13 +126,6 @@ export default {
             inputMsg: '',
             //用户输入的提示信息
             sendMsgTip: 'Type your message...',
-            chatRecord:[
-                {id:"123",name:"张三",info:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"},
-                {id:"456",name:"李四",info:"今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"},
-                {id:"456",name:"李四",info:"123456哈哈"},
-                {id:"123456",name:"cjx",info:"今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"},
-                {id:"123456",name:"cjx",info:"太难了太难了爷要晕了"}
-            ],
             searchFlag: false,
             searchHeight: {height:"0vh"},
             infoHeight: {height:"76vh"},
@@ -163,7 +156,13 @@ export default {
             if(this.inputMsg.trim()==""){
                 this.sendMsgTip='Information cannot be empty'
             }else{
-                this.chatRecord.push({
+                this.$store.state.socket.emit('new_message',{
+                    user_id: this.$store.state.oneself.id,
+                    user_name: this.$store.state.oneself.name,
+                    message: this.inputMsg,
+                    room: this.$store.state.roomInfo.url
+                })
+                this.$store.state.chatRecord.push({
                     id: this.$store.state.oneself.id,
                     name: this.$store.state.oneself.name,
                     info: this.inputMsg,
@@ -210,10 +209,22 @@ export default {
                 }
             })
             return newList;
+        },
+        //路由变化加入房间
+        routeChangeRoom(){
+            console.log(this.$route.query.roomId);
+            if(this.$route.query.roomId=='1'){
+                this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
+            }else{
+                this.$store.state.socket.emit('join',{
+                    user_id:this.$store.state.oneself.id,
+                    room: this.$route.query.roomId
+                })
+            }
         }
     },
     watch:{
-        chatRecord: ()=>{
+        '$store.state.chatRecord': ()=>{
             setTimeout(()=>{
                 let el=document.getElementsByClassName("msg-container")[0];
                 el.scrollTop=el.scrollHeight;
@@ -221,13 +232,24 @@ export default {
             // ↓只能定位到倒数第二个元素（数据更新了DOM还没渲染）
             // let el=document.getElementsByClassName("msg-container")[0];
             // el.scrollTop = el.scrollHeight;
-        }
+        },
+        //监听路由的变化，实现多房间
+        '$route': 'routeChangeRoom'
     },
     mounted(){
+        //改变url
+        // this.$router.push({
+        //     path: '/home/chatroom',
+        //     query: {
+        //         roomId: this.$store.state.roomId
+        //     }
+        // });
         //页面一加载滚动条到底部
-        let el=document.getElementsByClassName("msg-container")[0];
-        el.scrollTop=el.scrollHeight;
-    },
+        setTimeout(()=>{
+            let el=document.getElementsByClassName("msg-container")[0];
+            el.scrollTop=el.scrollHeight;
+        },10)
+    }
 }
 </script>
 

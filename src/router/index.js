@@ -12,10 +12,10 @@ const routes = [
   {
     path:'/home', 
     component: Home,
-    redirect: '/home/edit',
+    redirect: '/home/personal',
     children:[
       {path:'edit', component: Edit},
-      {path:'chatroom', component: Chatroom},
+      {path:'chatroom', component: Chatroom, name:"chat"},
       {path:'personal', component: Personal}
     ]
   },
