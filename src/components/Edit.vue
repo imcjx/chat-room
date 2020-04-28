@@ -7,13 +7,14 @@
                 suffix-icon="el-icon-search">
             </el-input>
         </div>
-        <label forclass="photo">
+        <label for="photoFile" class="photo">
             <div class="photo-container">
                 <span class="tip">Photo</span>
                 <el-button icon="el-icon-picture-outline" circle></el-button>
-                <div>You can upload jpg. gif or png files.<br>Max file size 3mb.</div>
+                <div v-html="photoTips"></div>
             </div>
         </label>
+        <input type="file" id="photoFile" style="display:none" @change="checkFile">
         <label>
             <div class="info">
                 <span class="tip">Name</span>
@@ -60,14 +61,25 @@ export default {
                 name: '',
                 topic: '',
                 description: '',
-            }
+            },
+            photoTips:'You can upload jpg. gif or png files.<br>Max file size 3mb.'
         }
     },
     methods:{
+        //检查文件上传的类型
+        checkFile(){
+            let file=document.getElementById('photoFile').value;
+            let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+            if(type=='.jpg'||type=='.gif'||type==".png"){
+                this.photoTips='Head image type meets the requirements'
+            }else{
+                this.photoTips='Wrong head image type, need jpg. gif or png files'
+            }
+        },
+        //创建房间
         createGroup(){
-            console.log(1);
             if(this.GroupInfo.name.trim()==''||this.GroupInfo.name.trim()==''
-            ||this.GroupInfo.name.trim()==''){
+            ||this.GroupInfo.name.trim()==''||document.getElementById('photoFile').value==''){
                  this.buttonInfo='Infomation empty!';
             }else{
                 this.$store.state.socket.emit('create',{
@@ -76,18 +88,16 @@ export default {
                     home_topic: this.GroupInfo.topic,
                     home_info: this.GroupInfo.description,
                     home_name: this.GroupInfo.name,
-                    admin_id: this.$store.state.oneself.id,
-                    url: `roomId=${this.$store.state.oneself.id}`
+                    admin_id: parseInt(this.$store.state.oneself.id),
+                    url: this.$store.state.oneself.id
                 });
                 this.buttonInfo='Create group';
             }
         }
     },
     mounted(){
-        //房间创建信息返回  
-        this.$store.state.socket.on('create', data => {
-            console.log(data);
-        })
+        console.log(document.getElementById('photoFile').value);
+        console.log(1);
     }
 }
 </script>

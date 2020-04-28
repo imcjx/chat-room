@@ -10,6 +10,10 @@
             <i class="el-icon-setting"></i>
         </el-aside>
         <el-main><router-view></router-view></el-main>
+        <div style="display:none">
+             <el-button :plain="true" @click="successCreate" id="successCreate">成功</el-button>
+             <el-button :plain="true" @click="errorCreate" id="errorCreate">成功</el-button>
+        </div>
     </el-container>
 </template>
 
@@ -22,14 +26,22 @@ export default {
         }
     },
     methods:{
-        test(){
-
-        }
-        //判断新老用户
-        // judUser(){
-        //     let id=JSON.parse(localStorage.getItem('id'));
-        //     return (id==null?0:1);
-        // }
+        //创建房间成功显示弹窗
+        successCreate() {
+            this.$message({
+                showClose: true,
+                message: '房间创建成功，自动跳转中...',
+                type: 'success'
+            });
+        },
+        //创建房间失败显示弹窗
+        errorCreate() {
+            this.$message({
+                showClose: true,
+                message: '房间创建成功，自动跳转中...',
+                type: 'error'
+            });
+        },
     },
     mounted(){ 
         this.$store.state.socket=io('http://47.94.81.206:80/');
@@ -42,29 +54,28 @@ export default {
                 setTimeout(()=>{
                     //加入默认房间
                     this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
-
                 },500)
             },100)
         });
         //监听加入默认房间是否成功
         this.$store.state.socket.on('join_default', data=>{
             this.$store.state.socket.emit('updateChatRecord',{
-                url: `room=${data.roomid}`,
+                url: data.roomid,
                 admin: parseInt(data.roomid),
             });
             this.$store.state.socket.emit('updateRoom',{
-                home_url: `room=${data.roomid}`,
+                home_url: data.roomid,
                 admin_id: parseInt(data.roomid),
             });
         })
         //监听加入普通房间是否成功
         this.$store.state.socket.on('join', data=>{
             this.$store.state.socket.emit('updateChatRecord',{
-                url: `room=${data.roomid}`,
+                url: data.roomid,
                 admin: parseInt(data.roomid),
             });
             this.$store.state.socket.emit('updateRoom',{
-                home_url: `room=${data.roomid}`,
+                home_url: data.roomid,
                 admin_id: parseInt(data.roomid),
             });
         })
@@ -82,26 +93,45 @@ export default {
         //断线
         this.$store.state.socket.on('disconnect', () =>{
             console.log('disconnect...');
+            // 离开房间
+            this.$store.state.socket.emit('leave',{
+                room:this.$store.state.roomInfo.roomId,
+                user_id:this.$store.state.oneself.id,
+                user_name:this.$store.state.oneself.name
+            })
         })
         
         //更新聊天记录
-        this.$store.state.socket.on('updateChatRecord', data => {
-            console.log('更新聊天记录，返回值：');
-            console.log(data);
-            this.$store.state.chatRecord=data;
+        this.$store.state.socket.on('updateChatRecord', res => {
+            this.$store.state.chatRecord=[];
+            for(let i=0;i<Object.keys(res.data).length;i++){
+                this.$store.state.chatRecord[i]=res.data[i]
+            }
         })
         //更新房间信息
         this.$store.state.socket.on('updateRoom', data => {
-            console.log(data);
             this.$store.state.roomInfo.members=data.num;
-            this.$store.state.roomInfo.roomId=data.admin;
+            this.$store.state.roomInfo.roomId=data.room;
             this.$store.state.roomInfo.face=data.home_face;
             this.$store.state.roomInfo.name=data.home_name;
             this.$store.state.roomInfo.topic=data.home_topic;
-            this.$store.state.roomInfo.url=data.room
-            this.$store.state.roomInfo.description=data.home_description
+            this.$store.state.roomInfo.url=data.room;
+            this.$store.state.roomInfo.description=data.home_description;
         })
-        
+        //房间创建信息返回  
+        this.$store.state.socket.on('create', data => {
+            if(data.key==1){
+                //显示创建成功信息
+                document.getElementById('successCreate').click();
+                 this.$store.state.socket.emit('join',{
+                     room:this.$store.state.oneself.id,
+                     user_name:this.$store.state.oneself.name,
+                 })
+            }else{
+                //显示创建失败信息
+                document.getElementById('errorCreate').click();
+            }
+        })
     }
 }
 </script>

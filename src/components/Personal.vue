@@ -8,7 +8,7 @@
                     v-model="searchSelfInfo">
             </el-input>
             <div class="personalInfo">
-                <div class="portrait"><img src="../assets/bird.png"></div>
+                <div class="portrait"><img id="test" src="../assets/bird.png"></div>
                 <div>
                     <div class="name">{{$store.state.oneself.name}}</div>
                     <div class="intro">{{$store.state.oneself.intro}}</div>
@@ -44,10 +44,10 @@
                             <label for="avatorFile">
                                 <div for="avatorFile" style="color:rgb(179,184,191)" class="avator-container">
                                     <el-button icon="el-icon-picture-outline" circle></el-button>
-                                    <div>You can upload jpg. gif or png files.<br>Max file size 3mb.</div>
+                                    <div v-html='avatorTip' style="font-size:14px"></div>
                                 </div>
                             </label>
-                            <input type="file" id="avatorFile" style="display:none">
+                            <input type="file" id="avatorFile" style="display:none" @change="checkFile">
                         </li>
                         <li>
                             <span style="color:rgb(143,143,155);font-weight:bold">Name</span><br>
@@ -75,7 +75,7 @@
                         </li>
                     </ul>
                     <footer class="modify">
-                        <el-button type="primary">Modify</el-button>
+                        <el-button type="primary" @click="updatePersonInfo">{{buttonInfo}}</el-button>
                     </footer>
                 </div>
             </div>
@@ -84,33 +84,60 @@
 </template>
 
 <script>
-
 export default {
     data(){
         return{
+            buttonInfo:'Modify',
             searchSelfInfo: '',
             modifyName:'',
             modifyEmail: '',
             modifyPhone: '',
+            avatorTip: 'You can upload jpg. gif or png files.<br>Max file size 3mb.',
         }
     },
     methods:{
+        //检查文件上传的类型
+        checkFile(){
+            let file=document.getElementById('avatorFile').value;
+            let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+            if(type=='.jpg'||type=='.gif'||type==".png"){
+                this.avatorTip='Head image type meets the requirements'
+            }else{
+                this.avatorTip='Wrong head image type, need jpg. gif or png files'
+            }
+        },
         updatePersonInfo(){
-            this.$store.state.socket.emit('updatePersonInfo',{
-                user_face: this.$store.state.oneself.headPortrait,
-                user_id: this.$store.state.oneself.id,
-                user_phone: this.$store.state.oneself.phone,
-                user_email: this.$store.state.oneself.email,
-            })
-            this.modifyName='';
-            this.modifyEmail='';
-            this.modifyPhone='';
+            if(this.modifyName.trim()==''||this.modifyEmail.trim()==''
+            ||this.modifyPhone.trim()==''||document.getElementById('avatorFile').value==''){
+                 this.buttonInfo='Infomation empty!';
+            }else{
+                //获取头像
+                let imgInput=document.getElementById('avatorFile').files[0];
+                let fr=new FileReader();
+                fr.readAsDataURL(imgInput);
+                let that=this;
+                fr.onload=function(){
+                    that.$store.state.socket.emit('updateUser',{
+                        user_face: this.result,
+                        user_id: that.$store.state.oneself.id,
+                        user_phone: that.modifyPhone,
+                        user_email: that.modifyEmail,
+                        user_name: that.modifyName
+                    })
+                    this.modifyName='';
+                    this.modifyEmail='';
+                    this.modifyPhone='';
+                    this.avatorTip='You can upload jpg. gif or png files.<br>Max file size 3mb.'
+                    this.buttonInfo='Modify'
+                }
+            }
         }
     },
     mounted(){
             // this.$store.state.socket.on('disconnect', function () {  //连接成功绑定的事件
             // console.log('disconnect...');
             // });  
+
     }
 }
 </script>

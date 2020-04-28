@@ -54,11 +54,14 @@
                     </div>
                 </div>
                 <footer>
-                    <div class="photo-container">
-                        <span class="tip">Photo</span>
-                        <button><i class="el-icon-picture-outline"></i></button>
-                        <span style="display:inline-block">You can upload jpg. gif or png files.Max file size 3mb.</span>
-                    </div>
+                    <label for="modifyPhotoFile">
+                        <div class="photo-container">
+                            <span class="tip">Photo</span>
+                            <button><i class="el-icon-picture-outline"></i></button>
+                            <span style="display:inline-block">You can upload jpg. gif or png files.Max file size 3mb.</span>
+                        </div>
+                    </label>
+                    <input type="file" id="modifyPhotoFile" style="display:none">
                     <div class="info">
                         <span class="tip">Name</span>
                         <el-input
@@ -89,27 +92,28 @@
                 <div class="container">
                     <div class="roomTitle">
                         <div class="portrait"><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
-                        <div>Documentation</div>
+                        <div>{{$store.state.roomInfo.name}}</div>
                         <a style="display:inline-block;" href="javascripts:;">
                             link
                             <i class="el-icon-paperclip share"></i>
                         </a>
                     </div>
-                    <hr>
-                    <div class="roomIntro">
+                    <div style="height:2px;width:100%;background-color:rgb(245,246,250)"></div>
+                    <div class="roomIntro" style="color:rgb(178,184,196)">
                         {{$store.state.roomInfo.description}}
                     </div>
                 </div>
                 <footer>
                     <div class="shareContent">
                         <ul>
-                            <li>QQ<span>1</span></li>
-                            <li>微信<span>2</span></li>
+                            <li @click="share('qq')">QQ</li>
+                            <li @click="share('qzone')">QQ空间</li>
                         </ul>
                     </div>
                 </footer>
             </div>
         </div>
+        
     </div>
 </template>
 
@@ -134,6 +138,19 @@ export default {
         }
     },
     methods:{
+        //分享到QQ空间
+        share(type){
+            //部署到线上可以，本地不行
+            if(type=='qzone'){
+                window.open('https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url='
+                +document.location.href+'?sharesource=qzone&title=匿名聊天室&pics=图片地址&summary=一起来聊天吧');
+            }else if(type=='qq'){
+                window.open('http://connect.qq.com/widget/shareqq/index.html?url='
+                +document.location.href+'?sharesource=qzone&title=匿名聊天室&pics=图片地址&summary=一起来聊天吧')// 测试：http://www.cnblogs.com/zxf100/
+            }
+        },
+        //分享到微博
+
         //展开右侧内容
         unfold(str){
             this.mainWidth.width='80%';
@@ -157,16 +174,17 @@ export default {
                 this.sendMsgTip='Information cannot be empty'
             }else{
                 this.$store.state.socket.emit('new_message',{
-                    user_id: this.$store.state.oneself.id,
+                    user_id: parseInt(this.$store.state.oneself.id),
                     user_name: this.$store.state.oneself.name,
                     message: this.inputMsg,
                     room: this.$store.state.roomInfo.url
-                })
-                this.$store.state.chatRecord.push({
-                    id: this.$store.state.oneself.id,
-                    name: this.$store.state.oneself.name,
-                    info: this.inputMsg,
                 });
+                setTimeout(()=>{
+                    this.$store.state.socket.emit('updateChatRecord',{
+                        url: this.$store.state.roomInfo.roomId,
+                        admin: parseInt(this.$store.state.roomInfo.roomId)
+                    });
+                },50)
                 this.sendMsgTip='Type your message...';
             }
             this.inputMsg='';
@@ -216,8 +234,9 @@ export default {
             if(this.$route.query.roomId=='1'){
                 this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
             }else{
+                console.log('join');
                 this.$store.state.socket.emit('join',{
-                    user_id:this.$store.state.oneself.id,
+                    user_name:this.$store.state.oneself.name,
                     room: this.$route.query.roomId
                 })
             }
