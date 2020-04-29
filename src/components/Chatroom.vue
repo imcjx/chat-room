@@ -3,7 +3,7 @@
         <div :style="mainWidth" class="main clearfix">
             <header>
                 <div class="group-theme-info clearfix">
-                    <div class="theme-photo"><img src="../assets/bird.png" alt="bird"></div>
+                    <div class="theme-photo"><img :src="$store.state.roomInfo.face" alt="房间头像"></div>
                     <div class="theme-name">{{$store.state.roomInfo.name}}</div><br>
                     <div class="theme-name" style="color: rgb(178,184,190);">{{$store.state.roomInfo.members}}members · {{$store.state.roomInfo.topic}}</div>
                 </div>
@@ -11,9 +11,9 @@
                     <i class="el-icon-search" @click="toggleSearch"></i>
                     <i class="el-icon-s-custom" @click="unfold('share')"></i>
                     <i class="el-icon-s-operation" @click="submenuFlag=!submenuFlag;"></i>
-                    <div v-show="submenuFlag" class="submenu" tabindex="2" @blur="disappear">
+                    <div v-show="submenuFlag" class="submenu" tabindex="2" @blur="disappear" style="z-index:999;">
                         <div style="margin-bottom: 15px;" @click="unfold('room')"><span>Mute</span><i class="el-icon-set-up"></i></div>
-                        <div @click="open"><span>Delete</span><i class="el-icon-delete"></i></div>
+                        <div @click="deleteRoom"><span>Delete</span><i class="el-icon-delete"></i></div>
                     </div>
                 </div>
             </header>
@@ -26,9 +26,9 @@
             </div>
             <div class="msg-container" :style="infoHeight">
                 <ul>
-                    <li :key="index" v-for="(item,index) in search($store.state.chatRecord)" class="clearfix">
+                    <li style="z-index:10;" :key="index" v-for="(item,index) in search($store.state.chatRecord)" class="clearfix">
                         <div :class="[item.id==$store.state.oneself.id?'msg-self':'msg-others']">
-                            <div class="portrait"><img src="../assets/bird.png" alt="头像"></div> 
+                            <div class="portrait"><img :src="item.face" alt="头像"></div> 
                             <div class="msg"><span style="color: rgb(47,52,67);">{{item.name}}</span><br>{{item.info}}<br>{{item.time}}</div>
                         </div>
                     </li>
@@ -38,7 +38,7 @@
                 <input type="text" :placeholder="sendMsgTip" v-model="inputMsg">
                 <div class="btns">
                     <i class="el-icon-picture-outline-round expression"></i>
-                    <i class="el-icon-paperclip share"></i>
+                    <i class="el-icon-paperclip share" @click="copyUrl"></i>
                     <el-button @click="sendMsg" type="primary" icon="el-icon-s-promotion" circle></el-button>
                 </div>
             </div>
@@ -47,9 +47,9 @@
             <header><i class="el-icon-arrow-left" @click="fold"></i></header>
             <div v-if="shareOrRoomFlag" class="roomInfo">
                 <div class="container">
-                    <div><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
+                    <div><img style="width: 100%;" :src="$store.state.roomInfo.face" alt=""></div>
                     <div>
-                        <span style="display:inline-block;margin-bottom:8px;">{{$store.state.roomInfo.name}}</span>
+                        <span style="display:inline-block;margin-bottom:8px;">{{$store.state.roomInfo.name}}</span><br>
                         <span style="display:inline-block;color: rgb(178, 184, 190);font-size:13px;">{{$store.state.roomInfo.members}}members · {{$store.state.roomInfo.topic}}</span>
                     </div>
                 </div>
@@ -57,43 +57,46 @@
                     <label for="modifyPhotoFile">
                         <div class="photo-container">
                             <span class="tip">Photo</span>
-                            <button><i class="el-icon-picture-outline"></i></button>
-                            <span style="display:inline-block">You can upload jpg. gif or png files.Max file size 3mb.</span>
+                            <button><i class="el-icon-picture-outline"></i></button><br>
+                            <span style="display:inline-block">{{modifyPhotoTips}}</span>
                         </div>
                     </label>
-                    <input type="file" id="modifyPhotoFile" style="display:none">
+                    <input type="file" id="modifyPhotoFile" style="display:none" @change="checkFile">
                     <div class="info">
                         <span class="tip">Name</span>
                         <el-input
-                            placeholder="Group Name"
+                            v-model="modifyRoom.name"
+                            :placeholder="this.$store.state.roomInfo.name"
                             clearable>
                         </el-input>
                     </div>
                     <div class="info">
                         <span class="tip">Topic(optional)</span>
                         <el-input
-                            placeholder="Group Topic"
+                            v-model="modifyRoom.topic"
+                            :placeholder="this.$store.state.roomInfo.topic"
                             clearable>
                         </el-input>
                     </div>
                     <div class="info">
                         <span class="tip">Description</span>
                         <el-input
+                            v-model="modifyRoom.description"
                             style="background-color: rgb(237,238,246);"
                             type="textarea"
                             :rows="4"
-                            placeholder="Group Description">
+                            :placeholder="this.$store.state.roomInfo.description">
                         </el-input>
                     </div>
-                    <el-button type="primary">Modify</el-button>
+                    <el-button type="primary" @click="modifyGroup">{{buttonInfo}}</el-button>
                 </footer>
             </div> 
             <div v-else class="shareInfo">
                 <div class="container">
                     <div class="roomTitle">
-                        <div class="portrait"><img style="width: 100%;" src="../assets/bird.png" alt=""></div>
+                        <div class="portrait"><img style="width: 100%;" :src="$store.state.roomInfo.name" alt=""></div>
                         <div>{{$store.state.roomInfo.name}}</div>
-                        <a style="display:inline-block;" href="javascripts:;">
+                        <a @click="copyUrl" style="display:inline-block;" href="javascripts:;">
                             link
                             <i class="el-icon-paperclip share"></i>
                         </a>
@@ -113,7 +116,6 @@
                 </footer>
             </div>
         </div>
-        
     </div>
 </template>
 
@@ -135,22 +137,97 @@ export default {
             infoHeight: {height:"76vh"},
             //搜索聊天记录
             searchChatInfo: '',
+            buttonInfo: 'Modify',
+            modifyPhotoTips:'You can upload jpg. gif or png files.Max file size 3mb.',
+            modifyRoom:{
+                name:'',
+                topic:'',
+                description:''
+            }
         }
     },
     methods:{
-        //分享到QQ空间
+        //删除房间
+        deleteRoom(){
+            //判断是否是房主
+            if(this.$store.state.oneself.id!=this.$store.state.roomInfo.roomId){
+                //不是房主
+                this.$message({
+                    message:"你没有权限！",
+                    type:'error'
+                })
+            }else{
+                this.open();
+            }
+        },
+        //点击复制链接
+        copyUrl(){
+            let tmpInput=document.createElement('input');
+            tmpInput.type="text";
+            tmpInput.value=window.location.href;
+            document.body.appendChild(tmpInput);
+            tmpInput.select();
+            document.execCommand("Copy");
+            document.body.removeChild(tmpInput)
+            this.$message({
+                message:"复制链接成功！分享给你的好友吧！",
+                type:'success'
+            })
+        },
+        //检查文件上传的类型
+        checkFile(){
+            let file=document.getElementById('modifyPhotoFile').value;
+            let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+            if(type=='.jpg'||type=='.gif'||type==".png"){
+                this.modifyPhotoTips='Head image type meets the requirements'
+            }else{
+                this.modifyPhotoTips='Wrong head image type, need jpg. gif or png files'
+            }
+        },
+        //修改房间信息
+        modifyGroup(){
+            if(this.modifyRoom.name.trim()==''||this.modifyRoom.topic.trim()==''
+                ||this.modifyRoom.description.trim()==''||document.getElementById('modifyPhotoFile').value==''){
+                    this.buttonInfo='Infomation empty!';
+            }else{
+                //获取头像
+                let imgInput=document.getElementById('modifyPhotoFile').files[0];
+                let fr=new FileReader();
+                fr.readAsDataURL(imgInput);
+                let that=this;
+                //获取头像类型
+                let file=document.getElementById('modifyPhotoFile').value;
+                let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+                type=type.substr(1)
+                fr.onload=function(){
+                    that.$store.state.socket.emit('changeHome',{
+                        tag: type,
+                        home_face: this.result,
+                        home_name: that.modifyRoom.name,
+                        home_topic: that.modifyRoom.topic,
+                        home_info: that.modifyRoom.description,
+                        admin_id: parseInt(that.$store.state.oneself.id),
+                        url: that.$store.state.oneself.id
+                    });
+                    
+                }
+                that.buttonInfo='Modify';
+                that.modifyRoom.name='';
+                that.modifyRoom.topic='';
+                that.modifyRoom.description='';
+            }
+        },
+        //分享
         share(type){
             //部署到线上可以，本地不行
             if(type=='qzone'){
                 window.open('https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url='
-                +document.location.href+'?sharesource=qzone&title=匿名聊天室&pics=图片地址&summary=一起来聊天吧');
+                +window.location.href+'?sharesource=qzone&title=匿名聊天室&pics=图片地址&summary=一起来聊天吧');
             }else if(type=='qq'){
                 window.open('http://connect.qq.com/widget/shareqq/index.html?url='
-                +document.location.href+'?sharesource=qzone&title=匿名聊天室&pics=图片地址&summary=一起来聊天吧')// 测试：http://www.cnblogs.com/zxf100/
+                +window.location.href+'?sharesource=qzone&title=匿名聊天室&pics=图片地址&summary=一起来聊天吧')// 测试：http://www.cnblogs.com/zxf100/
             }
         },
-        //分享到微博
-
         //展开右侧内容
         unfold(str){
             this.mainWidth.width='80%';
@@ -207,11 +284,8 @@ export default {
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                console.log('执行删除成功操作……');
-                this.$message({
-                    type: 'success',
-                    message: '删除成功!'
-                });
+                //发送删除信息
+                this.$store.state.socket.emit('DeleteRoom',{room:this.$store.state.roomInfo.roomId})
             }).catch(() => {
                 this.$message({
                     type: 'info',
@@ -231,10 +305,16 @@ export default {
         //路由变化加入房间
         routeChangeRoom(){
             console.log(this.$route.query.roomId);
+            //离开原先房间
+            this.$store.state.socket.emit('leave',{
+                room:this.$store.state.roomInfo.roomId,
+                user_id:this.$store.state.oneself.id,
+                user_name:this.$store.state.oneself.name
+            })
+            //加入房间
             if(this.$route.query.roomId=='1'){
                 this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
             }else{
-                console.log('join');
                 this.$store.state.socket.emit('join',{
                     user_name:this.$store.state.oneself.name,
                     room: this.$route.query.roomId
@@ -256,18 +336,22 @@ export default {
         '$route': 'routeChangeRoom'
     },
     mounted(){
-        //改变url
-        // this.$router.push({
-        //     path: '/home/chatroom',
-        //     query: {
-        //         roomId: this.$store.state.roomId
-        //     }
-        // });
         //页面一加载滚动条到底部
         setTimeout(()=>{
             let el=document.getElementsByClassName("msg-container")[0];
             el.scrollTop=el.scrollHeight;
         },10)
+        //接受删除信息加入默认房间
+        this.$store.state.socket.on('DeleteRoom', data =>{
+            // this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
+            this.$message({
+                    type: 'info',
+                    message: '所在房间已经被删除..前往默认房间中..'
+            });
+            setTimeout(()=>{ 
+                this.$router.push({path:'/home/chatroom',query:{roomId: 1}})
+            },2000)
+        })
     }
 }
 </script>

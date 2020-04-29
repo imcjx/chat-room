@@ -38,7 +38,7 @@ export default {
         errorCreate() {
             this.$message({
                 showClose: true,
-                message: '房间创建成功，自动跳转中...',
+                message: '房间创建失败，检查是否已创建过房间',
                 type: 'error'
             });
         },
@@ -52,8 +52,15 @@ export default {
                 //初始化信息
                 this.$store.state.socket.emit('init');
                 setTimeout(()=>{
-                    //加入默认房间
-                    this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
+                    if(this.$route.query.roomId=='1'||this.$route.query.roomId==undefined){
+                        //加入默认房间
+                        this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
+                    }else{
+                        this.$store.state.socket.emit('join',{
+                            user_name:this.$store.state.oneself.name,
+                            room: this.$route.query.roomId
+                        })
+                    }
                 },500)
             },100)
         });
@@ -123,13 +130,69 @@ export default {
             if(data.key==1){
                 //显示创建成功信息
                 document.getElementById('successCreate').click();
-                 this.$store.state.socket.emit('join',{
-                     room:this.$store.state.oneself.id,
-                     user_name:this.$store.state.oneself.name,
-                 })
+                //离开原先房间
+                this.$store.state.socket.emit('leave',{
+                    room:this.$store.state.roomInfo.roomId,
+                    user_id:this.$store.state.oneself.id,
+                    user_name:this.$store.state.oneself.name
+                })
+                //加入新的房间
+                this.$store.state.socket.emit('join',{
+                    room:this.$store.state.oneself.id,
+                    user_name:this.$store.state.oneself.name,
+                })
+                //路由跳转
+                setTimeout(()=>{
+                    this.$router.push({path:'/home/chatroom',query:{roomId: this.$store.state.roomInfo.roomId}})
+                },2000)
             }else{
                 //显示创建失败信息
                 document.getElementById('errorCreate').click();
+            }
+        })
+        //更新人数
+        this.$store.state.socket.on('Num', data =>{
+            this.$store.state.roomInfo.members=data.num;
+        })
+        //判断改变个人信息是否成功
+        this.$store.state.socket.on('updateUser', data =>{
+            if(data.key==1){
+                this.$store.state.oneself.id=data.id;
+                this.$store.state.oneself.name=data.name;
+                this.$store.state.oneself.headPortrait=data.face;
+                this.$store.state.oneself.intro=data.info;
+                this.$store.state.oneself.country=data.country;
+                this.$store.state.oneself.phone=data.phone;
+                this.$store.state.oneself.email=data.email;
+                this.$store.state.oneself.time=data.time;
+                this.$message({
+                    message:"更新个人信息成功",
+                    type:'success'
+                })
+            }else{
+                this.$message({
+                    message:"更新个人信息失败",
+                    type:'error'
+                })
+            }
+        }),
+        //判断改变房间信息是否成功
+        this.$store.state.socket.on('changeHome', data=>{
+            if(data.key==1){
+                //实时更新房间信息
+                this.$store.state.socket.emit('updateRoom',{
+                    home_url: this.$store.state.roomInfo.roomId,
+                    admin_id: parseInt(this.$store.state.roomInfo.roomId),
+                });
+                this.$message({
+                    message:"更新房间信息成功",
+                    type:'success'
+                })
+            }else{
+                this.$message({
+                    message:"更新房间信息失败",
+                    type:'error'
+                })
             }
         })
     }

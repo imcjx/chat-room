@@ -8,7 +8,7 @@
                     v-model="searchSelfInfo">
             </el-input>
             <div class="personalInfo">
-                <div class="portrait"><img id="test" src="../assets/bird.png"></div>
+                <div class="portrait"><img id="test" :src="this.$store.state.oneself.headPortrait"></div>
                 <div>
                     <div class="name">{{$store.state.oneself.name}}</div>
                     <div class="intro">{{$store.state.oneself.intro}}</div>
@@ -102,6 +102,13 @@ export default {
             let type=file.substring(file.lastIndexOf('.')).toLowerCase();
             if(type=='.jpg'||type=='.gif'||type==".png"){
                 this.avatorTip='Head image type meets the requirements'
+                //获取头像
+                let imgInput=document.getElementById('avatorFile').files[0];
+                let fr=new FileReader();
+                fr.readAsDataURL(imgInput);
+                fr.onload=function(){
+                    document.getElementById('test').src=this.result;
+                }
             }else{
                 this.avatorTip='Wrong head image type, need jpg. gif or png files'
             }
@@ -111,24 +118,31 @@ export default {
             ||this.modifyPhone.trim()==''||document.getElementById('avatorFile').value==''){
                  this.buttonInfo='Infomation empty!';
             }else{
+                //获取头像类型
+                let file=document.getElementById('avatorFile').value;
+                let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+                type=type.substr(1)
                 //获取头像
                 let imgInput=document.getElementById('avatorFile').files[0];
                 let fr=new FileReader();
                 fr.readAsDataURL(imgInput);
                 let that=this;
                 fr.onload=function(){
+                    console.log(type);
+                    document.getElementById('test').src=this.result;
                     that.$store.state.socket.emit('updateUser',{
-                        user_face: this.result,
-                        user_id: that.$store.state.oneself.id,
-                        user_phone: that.modifyPhone,
-                        user_email: that.modifyEmail,
-                        user_name: that.modifyName
+                        tag: type,
+                        face: this.result,
+                        id: parseInt(that.$store.state.oneself.id),
+                        phone: that.modifyPhone,
+                        email: that.modifyEmail,
+                        name: that.modifyName
                     })
-                    this.modifyName='';
-                    this.modifyEmail='';
-                    this.modifyPhone='';
-                    this.avatorTip='You can upload jpg. gif or png files.<br>Max file size 3mb.'
-                    this.buttonInfo='Modify'
+                    that.modifyName='';
+                    that.modifyEmail='';
+                    that.modifyPhone='';
+                    that.avatorTip='You can upload jpg. gif or png files.<br>Max file size 3mb.'
+                    that.buttonInfo='Modify'
                 }
             }
         }

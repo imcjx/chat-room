@@ -3,7 +3,7 @@
         <header>Create Group</header>
         <div class="search">
             <el-input
-                placeholder="Search for messages or users.."
+                placeholder="这个框没啥用..还原设计稿..."
                 suffix-icon="el-icon-search">
             </el-input>
         </div>
@@ -82,22 +82,32 @@ export default {
             ||this.GroupInfo.name.trim()==''||document.getElementById('photoFile').value==''){
                  this.buttonInfo='Infomation empty!';
             }else{
-                this.$store.state.socket.emit('create',{
-                    home_face: '无',
-                    home_name: this.GroupInfo.name,
-                    home_topic: this.GroupInfo.topic,
-                    home_info: this.GroupInfo.description,
-                    home_name: this.GroupInfo.name,
-                    admin_id: parseInt(this.$store.state.oneself.id),
-                    url: this.$store.state.oneself.id
-                });
-                this.buttonInfo='Create group';
+                //获取头像
+                let imgInput=document.getElementById('photoFile').files[0];
+                let fr=new FileReader();
+                fr.readAsDataURL(imgInput);
+                let that=this;
+                //获取头像类型
+                let file=document.getElementById('photoFile').value;
+                let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+                type=type.substr(1)
+                fr.onload=function(){
+                    console.log(this.result);
+                    that.$store.state.socket.emit('create',{
+                        tag: type,
+                        home_face: this.result,
+                        home_name: that.GroupInfo.name,
+                        home_topic: that.GroupInfo.topic,
+                        home_info: that.GroupInfo.description,
+                        admin_id: parseInt(that.$store.state.oneself.id),
+                        url: that.$store.state.oneself.id
+                    });
+                    that.buttonInfo='Create group';
+                } 
             }
         }
     },
     mounted(){
-        console.log(document.getElementById('photoFile').value);
-        console.log(1);
     }
 }
 </script>
