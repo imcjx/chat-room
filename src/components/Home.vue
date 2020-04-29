@@ -165,6 +165,10 @@ export default {
                 this.$store.state.oneself.phone=data.phone;
                 this.$store.state.oneself.email=data.email;
                 this.$store.state.oneself.time=data.time;
+                this.$store.state.socket.emit('updateChatRecord',{
+                    url: this.$store.state.roomInfo.roomId,
+                    admin: parseInt(this.$store.state.roomInfo.roomId)
+                });
                 this.$message({
                     message:"更新个人信息成功",
                     type:'success'

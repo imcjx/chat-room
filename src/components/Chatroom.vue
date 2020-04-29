@@ -186,35 +186,42 @@ export default {
         },
         //修改房间信息
         modifyGroup(){
-            if(this.modifyRoom.name.trim()==''||this.modifyRoom.topic.trim()==''
+            if(this.$store.state.oneself.id==this.$store.state.roomInfo.roomId){
+                if(this.modifyRoom.name.trim()==''||this.modifyRoom.topic.trim()==''
                 ||this.modifyRoom.description.trim()==''||document.getElementById('modifyPhotoFile').value==''){
                     this.buttonInfo='Infomation empty!';
-            }else{
-                //获取头像
-                let imgInput=document.getElementById('modifyPhotoFile').files[0];
-                let fr=new FileReader();
-                fr.readAsDataURL(imgInput);
-                let that=this;
-                //获取头像类型
-                let file=document.getElementById('modifyPhotoFile').value;
-                let type=file.substring(file.lastIndexOf('.')).toLowerCase();
-                type=type.substr(1)
-                fr.onload=function(){
-                    that.$store.state.socket.emit('changeHome',{
-                        tag: type,
-                        home_face: this.result,
-                        home_name: that.modifyRoom.name,
-                        home_topic: that.modifyRoom.topic,
-                        home_info: that.modifyRoom.description,
-                        admin_id: parseInt(that.$store.state.oneself.id),
-                        url: that.$store.state.oneself.id
-                    });
-                    
+                }else{
+                    //获取头像
+                    let imgInput=document.getElementById('modifyPhotoFile').files[0];
+                    let fr=new FileReader();
+                    fr.readAsDataURL(imgInput);
+                    let that=this;
+                    //获取头像类型
+                    let file=document.getElementById('modifyPhotoFile').value;
+                    let type=file.substring(file.lastIndexOf('.')).toLowerCase();
+                    type=type.substr(1)
+                    fr.onload=function(){
+                        that.$store.state.socket.emit('changeHome',{
+                            tag: type,
+                            home_face: this.result,
+                            home_name: that.modifyRoom.name,
+                            home_topic: that.modifyRoom.topic,
+                            home_info: that.modifyRoom.description,
+                            admin_id: parseInt(that.$store.state.oneself.id),
+                            url: that.$store.state.oneself.id
+                        });
+                        
+                    }
+                    that.buttonInfo='Modify';
+                    that.modifyRoom.name='';
+                    that.modifyRoom.topic='';
+                    that.modifyRoom.description='';
                 }
-                that.buttonInfo='Modify';
-                that.modifyRoom.name='';
-                that.modifyRoom.topic='';
-                that.modifyRoom.description='';
+            }else{
+                this.$message({
+                    type: 'error',
+                    message: '你没有权限'
+                });    
             }
         },
         //分享
