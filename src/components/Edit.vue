@@ -78,8 +78,8 @@ export default {
         },
         //创建房间
         createGroup(){
-            if(this.GroupInfo.name.trim()==''||this.GroupInfo.name.trim()==''
-            ||this.GroupInfo.name.trim()==''||document.getElementById('photoFile').value==''){
+            if(this.GroupInfo.name.trim()==''||this.GroupInfo.topic.trim()==''
+            ||this.GroupInfo.description.trim()==''||document.getElementById('photoFile').value==''){
                  this.buttonInfo='Infomation empty!';
             }else{
                 //获取头像
@@ -90,7 +90,7 @@ export default {
                 //获取头像类型
                 let file=document.getElementById('photoFile').value;
                 let type=file.substring(file.lastIndexOf('.')).toLowerCase();
-                type=type.substr(1)
+                type=type.substr(1);
                 fr.onload=function(){
                     console.log(this.result);
                     that.$store.state.socket.emit('create',{

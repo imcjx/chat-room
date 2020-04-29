@@ -192,6 +192,9 @@ export default {
                     this.buttonInfo='Infomation empty!';
                 }else{
                     //获取头像
+                    console.log(this.modifyRoom.name);
+                    console.log(this.modifyRoom.topic);
+                    
                     let imgInput=document.getElementById('modifyPhotoFile').files[0];
                     let fr=new FileReader();
                     fr.readAsDataURL(imgInput);
@@ -210,12 +213,12 @@ export default {
                             admin_id: parseInt(that.$store.state.oneself.id),
                             url: that.$store.state.oneself.id
                         });
-                        
+                        that.buttonInfo='Modify';
+                        that.modifyRoom.name='';
+                        that.modifyRoom.topic='';
+                        that.modifyRoom.description='';
                     }
-                    that.buttonInfo='Modify';
-                    that.modifyRoom.name='';
-                    that.modifyRoom.topic='';
-                    that.modifyRoom.description='';
+                    
                 }
             }else{
                 this.$message({
