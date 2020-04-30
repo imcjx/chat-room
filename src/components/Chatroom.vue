@@ -35,7 +35,7 @@
                 </ul>
             </div>
             <div class="msg-send">
-                <input type="text" :placeholder="sendMsgTip" v-model="inputMsg" @keyup.enter="sendMsg">
+                <input type="text" :placeholder="sendMsgTip" v-model="inputMsg" @keyup.enter="sendMsg" v-focus>
                 <div class="btns">
                     <i class="el-icon-picture-outline-round expression" @click="sendEmoji"></i>
                     <i class="el-icon-paperclip share" @click="copyUrl"></i>
@@ -47,7 +47,7 @@
             <header><i class="el-icon-arrow-left" @click="fold"></i></header>
             <div v-if="shareOrRoomFlag" class="roomInfo">
                 <div class="container">
-                    <div><img style="width: 100%;" :src="$store.state.roomInfo.face" alt=""></div>
+                    <div><img style="width: 100%;" :src="$store.state.roomInfo.face" alt="" id="test"></div>
                     <div>
                         <span style="display:inline-block;margin-bottom:8px;">{{$store.state.roomInfo.name}}</span><br>
                         <span style="display:inline-block;color: rgb(178, 184, 190);font-size:13px;">{{$store.state.roomInfo.members}}members · {{$store.state.roomInfo.topic}}</span>
@@ -180,6 +180,13 @@ export default {
             let type=file.substring(file.lastIndexOf('.')).toLowerCase();
             if(type=='.jpg'||type=='.gif'||type==".png"){
                 this.modifyPhotoTips='Head image type meets the requirements'
+                //获取头像
+                let imgInput=document.getElementById('modifyPhotoFile').files[0];
+                let fr=new FileReader();
+                fr.readAsDataURL(imgInput);
+                fr.onload=function(){
+                    document.getElementById('test').src=this.result;
+                }
             }else{
                 this.modifyPhotoTips='Wrong head image type, need jpg. gif or png files'
             }
@@ -192,9 +199,7 @@ export default {
                     this.buttonInfo='Infomation empty!';
                 }else{
                     //获取头像
-                    console.log(this.modifyRoom.name);
-                    console.log(this.modifyRoom.topic);
-                    
+
                     let imgInput=document.getElementById('modifyPhotoFile').files[0];
                     let fr=new FileReader();
                     fr.readAsDataURL(imgInput);
@@ -351,6 +356,13 @@ export default {
         },
         //监听路由的变化，实现多房间
         '$route': 'routeChangeRoom'
+    },
+    directives:{
+        'focus':{
+            inserted(el){
+                el.focus();
+            }
+        }
     },
     mounted(){
         //页面一加载滚动条到底部

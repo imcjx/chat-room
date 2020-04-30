@@ -137,25 +137,6 @@ export default {
             this.$store.state.roomInfo.topic=data.home_topic;
             this.$store.state.roomInfo.url=data.room;
             this.$store.state.roomInfo.description=data.home_description;
-            let that=this;
-            console.log('ajax');     
-            $.ajax({
-                type : "GET",
-                //请求地址
-                url : "http://47.94.81.206:80/Get_homeface",
-                //数据，json字符串
-                data : {web_url:that.$store.state.roomInfo.roomId},
-                //请求成功
-                success : function(res) {
-                    that.$store.state.roomInfo.face=res.home_face;
-                    console.log(that.$store.state.roomInfo.face);
-                },
-                //请求失败，包含具体的错误信息
-                error : function(e){
-                    console.log(e.status);
-                    console.log(e.responseText);
-                }
-            });
         })
         //房间创建信息返回  
         this.$store.state.socket.on('create', data => {
