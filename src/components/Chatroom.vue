@@ -35,9 +35,9 @@
                 </ul>
             </div>
             <div class="msg-send">
-                <input type="text" :placeholder="sendMsgTip" v-model="inputMsg">
+                <input type="text" :placeholder="sendMsgTip" v-model="inputMsg" @keyup.enter="sendMsg">
                 <div class="btns">
-                    <i class="el-icon-picture-outline-round expression"></i>
+                    <i class="el-icon-picture-outline-round expression" @click="sendEmoji"></i>
                     <i class="el-icon-paperclip share" @click="copyUrl"></i>
                     <el-button @click="sendMsg" type="primary" icon="el-icon-s-promotion" circle></el-button>
                 </div>
@@ -55,8 +55,8 @@
                 </div>
                 <footer>
                     <label for="modifyPhotoFile">
+                        <span class="tip">Photo</span>
                         <div class="photo-container">
-                            <span class="tip">Photo</span>
                             <button><i class="el-icon-picture-outline"></i></button><br>
                             <span style="display:inline-block">{{modifyPhotoTips}}</span>
                         </div>
@@ -84,7 +84,7 @@
                             v-model="modifyRoom.description"
                             style="background-color: rgb(237,238,246);"
                             type="textarea"
-                            :rows="4"
+                            :rows="2"
                             :placeholder="this.$store.state.roomInfo.description">
                         </el-input>
                     </div>
@@ -330,6 +330,13 @@ export default {
                     room: this.$route.query.roomId
                 })
             }
+        },
+        //发送表情
+        sendEmoji(){
+            this.$message({
+                type: 'info',
+                message: '功能敬请期待...'
+            })
         }
     },
     watch:{
@@ -351,17 +358,6 @@ export default {
             let el=document.getElementsByClassName("msg-container")[0];
             el.scrollTop=el.scrollHeight;
         },10)
-        //接受删除信息加入默认房间
-        this.$store.state.socket.on('DeleteRoom', data =>{
-            // this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
-            this.$message({
-                    type: 'info',
-                    message: '所在房间已经被删除..前往默认房间中..'
-            });
-            setTimeout(()=>{ 
-                this.$router.push({path:'/home/chatroom',query:{roomId: 1}})
-            },2000)
-        })
     }
 }
 </script>
@@ -669,7 +665,6 @@ footer .photo-container{
     position: relative;
     width: 100%;
     height: 12vh;
-    margin: 0 auto 20px;
     padding: 10px;
     background-color: rgb(237,238,246);
     font-size: 10px;
@@ -681,13 +676,9 @@ footer .photo-container{
 }
 
 footer .tip{
-    position: absolute;
-    left: 0;
-    top: 0;
-    transform: translateY(-100%);
     color: rgb(143,143,155);
     font-weight: bold;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 footer .photo-container > span{
@@ -717,7 +708,6 @@ footer .info >>> .el-input__inner{
     background-color: rgb(237,238,246);
     height: 4vh;
     font-size: 12px;
-    margin-bottom: 20px;
 }
 
 footer .info >>> .el-textarea__inner{

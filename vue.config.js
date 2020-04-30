@@ -10,6 +10,7 @@ module.exports = {
                    '^/api': ''
                },
             }
-       }
+       },
+    //    contentBase:path.join(_dirname,'src')
     }
 }

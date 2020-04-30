@@ -77,14 +77,25 @@ export default {
         })
         //监听加入普通房间是否成功
         this.$store.state.socket.on('join', data=>{
-            this.$store.state.socket.emit('updateChatRecord',{
+            if(data.key==1){
+                this.$store.state.socket.emit('updateChatRecord',{
                 url: data.roomid,
                 admin: parseInt(data.roomid),
-            });
-            this.$store.state.socket.emit('updateRoom',{
-                home_url: data.roomid,
-                admin_id: parseInt(data.roomid),
-            });
+                });
+                this.$store.state.socket.emit('updateRoom',{
+                    home_url: data.roomid,
+                    admin_id: parseInt(data.roomid),
+                });
+            }else{
+                this.$message({
+                    message:"加入房间失败(请检查房间url是否正确)，返回原房间中...",
+                    type:'error'
+                })
+                //路由跳转
+                setTimeout(()=>{
+                    this.$router.push({path:'/home/chatroom',query:{roomId: this.$store.state.roomInfo.roomId}})
+                },3000)
+            }
         })
          //获得初始化信息
         this.$store.state.socket.on('init',(data)=>{
@@ -96,6 +107,8 @@ export default {
             this.$store.state.oneself.phone=data.phone;
             this.$store.state.oneself.email=data.email;
             this.$store.state.oneself.time=data.time;
+            console.log(this.$store.state.oneself.headPortrait);
+            
         })
         //断线
         this.$store.state.socket.on('disconnect', () =>{
@@ -124,6 +137,25 @@ export default {
             this.$store.state.roomInfo.topic=data.home_topic;
             this.$store.state.roomInfo.url=data.room;
             this.$store.state.roomInfo.description=data.home_description;
+            let that=this;
+            console.log('ajax');     
+            $.ajax({
+                type : "GET",
+                //请求地址
+                url : "http://47.94.81.206:80/Get_homeface",
+                //数据，json字符串
+                data : {web_url:that.$store.state.roomInfo.roomId},
+                //请求成功
+                success : function(res) {
+                    that.$store.state.roomInfo.face=res.home_face;
+                    console.log(that.$store.state.roomInfo.face);
+                },
+                //请求失败，包含具体的错误信息
+                error : function(e){
+                    console.log(e.status);
+                    console.log(e.responseText);
+                }
+            });
         })
         //房间创建信息返回  
         this.$store.state.socket.on('create', data => {
@@ -173,6 +205,7 @@ export default {
                     message:"更新个人信息成功",
                     type:'success'
                 })
+                console.log(this.$store.state.oneself.headPortrait);
             }else{
                 this.$message({
                     message:"更新个人信息失败",
@@ -198,6 +231,17 @@ export default {
                     type:'error'
                 })
             }
+        })
+        //接受删除信息加入默认房间
+        this.$store.state.socket.on('DeleteRoom', data =>{
+            // this.$store.state.socket.emit('join_default',{user_id:this.$store.state.oneself.id})
+            this.$message({
+                    type: 'info',
+                    message: '所在房间已经被删除..前往默认房间中..'
+            });
+            setTimeout(()=>{ 
+                this.$router.push({path:'/home/chatroom',query:{roomId: 1}})
+            },2000)
         })
     }
 }
