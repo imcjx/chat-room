@@ -101,7 +101,7 @@ export default {
         this.$store.state.socket.on('init',(data)=>{
             this.$store.state.oneself.id=data.id;
             this.$store.state.oneself.name=data.name;
-            this.$store.state.oneself.headPortrait=data.face;
+            this.$store.state.oneself.headPortrait=data.face+'?t='+(new Date()).getTime().toString();
             this.$store.state.oneself.intro=data.info;
             this.$store.state.oneself.country=data.country;
             this.$store.state.oneself.phone=data.phone;
@@ -125,6 +125,9 @@ export default {
         this.$store.state.socket.on('updateChatRecord', res => {
             this.$store.state.chatRecord=[];
             for(let i=0;i<Object.keys(res.data).length;i++){
+                // console.log(res.data[i].face);
+                
+                res.data[i].face+=('?t='+(new Date()).getTime().toString())
                 this.$store.state.chatRecord[i]=res.data[i]
             }
         })
@@ -132,7 +135,7 @@ export default {
         this.$store.state.socket.on('updateRoom', data => {
             this.$store.state.roomInfo.members=data.num;
             this.$store.state.roomInfo.roomId=data.room;
-            this.$store.state.roomInfo.face=data.home_face;
+            this.$store.state.roomInfo.face=data.home_face+'?t='+(new Date()).getTime().toString();
             this.$store.state.roomInfo.name=data.home_name;
             this.$store.state.roomInfo.topic=data.home_topic;
             this.$store.state.roomInfo.url=data.room;
@@ -172,7 +175,7 @@ export default {
             if(data.key==1){
                 this.$store.state.oneself.id=data.id;
                 this.$store.state.oneself.name=data.name;
-                this.$store.state.oneself.headPortrait=data.face;
+                this.$store.state.oneself.headPortrait=data.face+'?t='+(new Date()).getTime().toString();
                 this.$store.state.oneself.intro=data.info;
                 this.$store.state.oneself.country=data.country;
                 this.$store.state.oneself.phone=data.phone;
