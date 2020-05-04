@@ -272,10 +272,6 @@ export default {
     margin: 30px 0;
 }
 
-.router-link-active{
-    color: rgb(16,126,255);
-}
-
 .el-aside i{
     font-size: 22px;
     font-weight: bold;
@@ -291,6 +287,10 @@ export default {
 }
 
 .el-aside i:hover{
+    color: rgb(16,126,255);
+}
+
+.router-link-exact-active i , .router-link-active i{
     color: rgb(16,126,255);
 }
 
