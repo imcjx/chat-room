@@ -49,6 +49,16 @@ export default {
                 type: 'error'
             });
         },
+        //心跳
+        heartbeat() {
+            //每隔5s发送消息告诉浏览器还活着
+            setInterval(()=>{
+                this.$store.state.socket.emit('heartbeat',{
+                    user_id:this.$store.state.oneself.id,
+                    room:this.$store.state.roomInfo.roomId
+                });
+            },5000)
+        }
     },
     mounted(){ 
         this.$store.state.socket=io('http://47.94.81.206:80/');
@@ -81,6 +91,10 @@ export default {
                 home_url: data.roomid,
                 admin_id: parseInt(data.roomid),
             });
+            //加入房间后发送心跳
+            setTimeout(()=>{
+                this.heartbeat();
+            },50)
         })
         //监听加入普通房间是否成功
         this.$store.state.socket.on('join', data=>{
@@ -103,6 +117,10 @@ export default {
                     this.$router.push({path:'/home/chatroom',query:{roomId: this.$store.state.roomInfo.roomId}})
                 },3000)
             }
+            //加入房间后发送心跳
+            setTimeout(()=>{
+                this.heartbeat();
+            },50)
         })
          //获得初始化信息
         this.$store.state.socket.on('init',(data)=>{
