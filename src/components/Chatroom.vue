@@ -34,10 +34,15 @@
                     </li>
                 </ul>
             </div>
-            <div class="msg-send">
+            <div class="msg-send" style="position:relative">
+                <div class="browBox" v-if="faceShow">
+                        <ul>
+                            <li v-for="(item,index) in faceList" :key="index" @click="getBrow(index)">{{item}}</li>
+                        </ul>
+                </div>
                 <input type="text" :placeholder="sendMsgTip" v-model="inputMsg" @keyup.enter="sendMsg" v-focus>
                 <div class="btns">
-                    <i class="el-icon-picture-outline-round expression" @click="sendEmoji"></i>
+                    <i class="el-icon-picture-outline-round expression" @click="faceContent"></i>
                     <i class="el-icon-paperclip share" @click="copyUrl"></i>
                     <el-button @click="sendMsg" type="primary" icon="el-icon-s-promotion" circle></el-button>
                 </div>
@@ -94,7 +99,7 @@
             <div v-else class="shareInfo">
                 <div class="container">
                     <div class="roomTitle">
-                        <div class="portrait"><img style="width: 100%;" :src="$store.state.roomInfo.name" alt=""></div>
+                        <div class="portrait"><img style="width: 100%;" :src="$store.state.roomInfo.face" alt=""></div>
                         <div>{{$store.state.roomInfo.name}}</div>
                         <a @click="copyUrl" style="display:inline-block;" href="javascripts:;">
                             link
@@ -120,6 +125,7 @@
 </template>
 
 <script>
+const appData = require("../assets/emojis.json");
 export default {
     data(){
         return{
@@ -143,10 +149,48 @@ export default {
                 name:'',
                 topic:'',
                 description:''
-            }
+            },
+            faceList: [],
+            faceShow: false,
+            getBrowString: "",
         }
     },
     methods:{
+        
+        utf16toEntities(str) {
+            var patt = /[\ud800-\udbff][\udc00-\udfff]/g; // 检测utf16字符正则  
+            return str.replace(patt, function (char) {
+                var H, L, code;
+                if (char.length === 2) {
+                    H = char.charCodeAt(0); // 取出高位  
+                    L = char.charCodeAt(1); // 取出低位  
+                    code = (H - 0xD800) * 0x400 + 0x10000 + L - 0xDC00; // 转换算法  
+                    return "&#" + code + ";";
+                } else {
+                    return char;
+                }
+            });
+        },
+
+         faceContent() {
+            this.faceShow = !this.faceShow;
+            if (this.faceShow == true) {
+                for (let i in appData) {
+                this.faceList.push(appData[i].char);
+                }
+            } else {
+                this.faceList = [];
+            }
+        },
+        // 获取用户点击之后的标签 ，存放到输入框内
+        getBrow(index) {
+            for (let i in this.faceList) {
+                if (index == i) {
+                    this.getBrowString = this.faceList[index];
+                    this.inputMsg += this.getBrowString;
+                }
+            }
+        },
         //删除房间
         deleteRoom(){
             //判断是否是房主
@@ -268,7 +312,7 @@ export default {
                 this.$store.state.socket.emit('new_message',{
                     user_id: parseInt(this.$store.state.oneself.id),
                     user_name: this.$store.state.oneself.name,
-                    message: this.inputMsg,
+                    message: this.utf16toEntities(this.inputMsg),
                     room: this.$store.state.roomInfo.url
                 });
                 setTimeout(()=>{
@@ -375,6 +419,37 @@ export default {
 </script>
 
 <style scoped>
+.browBox{
+    top: -150px;
+    right: 10%;
+    position: absolute;
+    width: 200px;
+    height: 150px;
+    overflow: auto;
+    background-color: #fff;
+}
+
+.browBox ul{
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+
+.browBox ul li{
+    width: 20%;
+    box-sizing: border-box;
+    list-style: none;
+    text-align: center;
+    border: 1px solid #fff;
+    cursor: pointer; 
+}
+
+.browBox ul li:hover{
+    border: 1px solid #000;
+}
+
+
 .clearfix:after {
    content:""; 
    display: block; 

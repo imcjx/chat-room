@@ -26,6 +26,13 @@ export default {
         }
     },
     methods:{
+        entitiesToUtf16(str) {
+            return str.replace(/&#(\d+);/g, function (match, dec) {
+                let H = Math.floor((dec - 0x10000) / 0x400) + 0xD800;
+                let L = Math.floor(dec - 0x10000) % 0x400 + 0xDC00;
+                return String.fromCharCode(H, L);
+            });
+        },
         //创建房间成功显示弹窗
         successCreate() {
             this.$message({
@@ -126,7 +133,7 @@ export default {
             this.$store.state.chatRecord=[];
             for(let i=0;i<Object.keys(res.data).length;i++){
                 // console.log(res.data[i].face);
-                
+                res.data[i].info=this.entitiesToUtf16(res.data[i].info)
                 res.data[i].face+=('?t='+(new Date()).getTime().toString())
                 this.$store.state.chatRecord[i]=res.data[i]
             }
