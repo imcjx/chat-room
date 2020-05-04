@@ -398,6 +398,7 @@ export default {
             // let el=document.getElementsByClassName("msg-container")[0];
             // el.scrollTop = el.scrollHeight;
         },
+        //
         //监听路由的变化，实现多房间
         '$route': 'routeChangeRoom'
     },
