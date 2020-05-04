@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div :style="mainWidth" class="main clearfix">
-            <header>
+            <header  style="z-index:999;">
                 <div class="group-theme-info clearfix">
                     <div class="theme-photo"><img :src="$store.state.roomInfo.face" alt="房间头像"></div>
                     <div class="theme-name">{{$store.state.roomInfo.name}}</div><br>
@@ -11,7 +11,7 @@
                     <i class="el-icon-search" @click="toggleSearch"></i>
                     <i class="el-icon-s-custom" @click="unfold('share')"></i>
                     <i class="el-icon-s-operation" @click="submenuFlag=!submenuFlag;"></i>
-                    <div v-show="submenuFlag" class="submenu" tabindex="2" @blur="disappear" style="z-index:999;">
+                    <div v-show="submenuFlag" class="submenu" tabindex="2" @blur="disappear">
                         <div style="margin-bottom: 15px;" @click="unfold('room')"><span>Mute</span><i class="el-icon-set-up"></i></div>
                         <div @click="deleteRoom"><span>Delete</span><i class="el-icon-delete"></i></div>
                     </div>
@@ -26,7 +26,7 @@
             </div>
             <div class="msg-container" :style="infoHeight">
                 <ul>
-                    <li style="z-index:10;" :key="index" v-for="(item,index) in search($store.state.chatRecord)" class="clearfix">
+                    <li :key="index" v-for="(item,index) in search($store.state.chatRecord)" class="clearfix">
                         <div :class="[item.id==$store.state.oneself.id?'msg-self':'msg-others']">
                             <div class="portrait"><img :src="item.face" alt="头像"></div> 
                             <div class="msg"><span style="color: rgb(47,52,67);">{{item.name}}</span><br>{{item.info}}<br>{{item.time}}</div>
